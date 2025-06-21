@@ -100,6 +100,7 @@ if uploaded_pdf and api_key:
         st.session_state.last_quiz_result = flashcards
 
         if st.button("⬅️ Back"):
+            st.session_state.pop("practice_quiz", None)
             st.session_state.mode = None
 
     # Flashcards Mode UI and Logic
@@ -114,6 +115,7 @@ if uploaded_pdf and api_key:
                 st.markdown(result)
 
         if st.button("⬅️ Back"):
+            st.session_state.pop(flashcards,None)
             st.session_state.mode = None
 
     # Mind Map Mode UI and Logic
@@ -130,6 +132,7 @@ if uploaded_pdf and api_key:
             st.markdown(result)
 
         if st.button("⬅️ Back"):
+            st.session_state.pop(mind_map,None)
             st.session_state.mode = None
 else:
     st.warning("Please upload a PDF and enter your API key.")
