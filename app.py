@@ -41,7 +41,7 @@ def call_together_ai(api_key, prompt):
     
 
 # ----------------- CHUNKING -------------------
-def chunk_text(text, chunk_size=250):
+def chunk_text(text, chunk_size=1000):
     words = text.split()
     return [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
 
@@ -65,46 +65,54 @@ if uploaded_pdf and api_key:
             st.session_state.chunks = chunk_text(text)  # <- THIS IS WHERE YOU ADD IT
 
 
-            if st.button("✨ Generate Practice Quiz Questions"):
-                with st.spinner("Calling Together.ai and generating content..."):
-                    flashcards=[]
-                    for i, chunk in enumerate(st.session_state.chunks):
-                        prompt = f"From the following notes, devise 10 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by dollar signs. Vary the questions to cover different levels of bloom's taxonomy and indicate when you are doing so. Also describe each chunk as you list them. Notes:\n{chunk}"
-                        try:
-                            result = call_together_ai(api_key, prompt)
-                            flashcards.append(result)
-                            time.sleep(1.5)  # throttle to avoid hitting rate limit
-                        except Exception as e:
-                            error_str=str(e).lower()
-                            if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
-                                st.markdown("done")
-                st.success("Done generating content!")
-
-                # Optionally display results
-                st.header("🧠 Flashcards & Questions Preview")
-                for i, content in enumerate(flashcards):
-                    st.subheader(f"Chunk {i+1}")
-                    st.markdown(content)
-
-                # Allow CSV export
-            
-            if st.button ("Generate Groupings/Mind Map Ideas"):
-                with st.spinner("Calling Together.ai and generating content..."):
-                    chunkList=[]
-                    for i, chunk in enumerate(st.session_state.chunks):
-                        chunkList.append(chunk)
-                    prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
+    if st.button("✨ Generate Practice Quiz Questions"):
+        with st.spinner("Calling Together.ai and generating content..."):
+            flashcards=[]
+            for i, chunk in enumerate(st.session_state.chunks):
+                prompt = f"From the following notes, devise 10 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by dollar signs. However, if math is not present, don't bring it in. Notes:\n{chunk}"
+                try:
                     result = call_together_ai(api_key, prompt)
-                    st.header("🧠 Grouping and Mind Map Preview")
-                    st.subheader(f"Groupings")
-                    st.markdown(result)
-            if st.button ("Generate Flashcards"):
-                flashcards=[]
-                with st.spinner("Calling Together.ai and making your flashcards..."):
-                    for i, chunk in enumerate(st.session_state.chunks):
-                        prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
-                        result=call_together_ai(api_key,prompt)
-                        st.header("Flashcards")
-                        st.markdown(result)
+                    flashcards.append(result)
+                    # Optional sleep to avoid hitting rate limit
+                    time.sleep(1.5)
+                except Exception as e:
+                    error_str = str(e).lower()
+                    if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
+                        st.error("Rate limit hit — try again shortly or reduce chunk size.")
+                        st.stop()
+                    else:
+                        st.error(f"Unexpected error: {e}")
+                        st.stop()
+        st.success("Done generating practice questions!")
+        
+
+        st.header("🧠 Practice Quiz Preview")
+        for idx, content in enumerate(flashcards):
+            st.subheader(f"Chunk {idx+1}")
+            st.markdown(content)
+
+        # Save to session state if needed
+        st.session_state.last_quiz_result = flashcards
+
+        # Allow CSV export
+    
+    if st.button ("Generate Groupings/Mind Map Ideas"):
+        with st.spinner("Calling Together.ai and generating content..."):
+            chunkList=[]
+            for i, chunk in enumerate(st.session_state.chunks):
+                chunkList.append(chunk)
+            prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
+            result = call_together_ai(api_key, prompt)
+            st.header("🧠 Grouping and Mind Map Preview")
+            st.subheader(f"Groupings")
+            st.markdown(result)
+    if st.button ("Generate Flashcards"):
+        with st.spinner("Calling Together.ai and making your flashcards..."):
+            flashcards=[]
+            for i, chunk in enumerate(st.session_state.chunks):
+                prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
+                result=call_together_ai(api_key,prompt)
+                st.header("Flashcards")
+                st.markdown(result)
 else:
     st.warning("Please upload a PDF and enter your API key.")
