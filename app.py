@@ -18,28 +18,19 @@ def extract_text_from_pdf(uploaded_file):
 
 # ----------------- TOGETHER.AI REQUEST (SDK Version) -------------------
 def call_together_ai(api_key, prompt):
-    try:
-        client = Together(api_key=api_key)
-        response = client.chat.completions.create(
-            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-            messages=[
-                {"role": "system", "content": "You are an expert tutor creating flashcards and practice test questions."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=1024,
-            temperature=0.7,
-            stream=False  # Set to True for real-time streaming in future
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        if "Rate limit" in str(e) or "quota" in str(e).lower():
-            print("⚠️ Rate limit or token quota exceeded.")
-            # Handle it: wait, rotate keys, or retry later
-            time.sleep(5)  # simple backoff
-            raise  # Optional: re-raise if you want to handle it at a higher level
-        else:
-            print(f"❌ Other error: {e}")
-            raise
+    client = Together(api_key=api_key)
+    response = client.chat.completions.create(
+        model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        messages=[
+            {"role": "system", "content": "You are an expert tutor creating flashcards and practice test questions."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1024,
+        temperature=0.7,
+        stream=False  # Set to True for real-time streaming in future
+    )
+    return response.choices[0].message.content
+    
 
 # ----------------- CHUNKING -------------------
 def chunk_text(text, chunk_size=250):
@@ -62,14 +53,19 @@ if uploaded_pdf and api_key:
     flashcards = []
     quiz_questions = []
 
-    if st.button("✨ Generate Flashcards and Questions"):
+    if st.button("✨ Generate Practice Quiz Questions"):
         with st.spinner("Calling Together.ai and generating content..."):
             for i, chunk in enumerate(chunks):
-                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present). Notes:\n{chunk}"
-                result = call_together_ai(api_key, prompt)
-                flashcards.append((chunk, result))
-                time.sleep(1.5)  # throttle to avoid hitting rate limit
-
+                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by "$$..$$". Notes:\n{chunk}"
+                try:
+                    result = call_together_ai(api_key, prompt)
+                    flashcards.append((chunk, result))
+                    time.sleep(1.5)  # throttle to avoid hitting rate limit
+                except Exception as e:
+                    error_str=str(e).lower()
+                    if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
+                        print("detected")
+                        
         st.success("Done generating content!")
 
         # Optionally display results
@@ -93,7 +89,7 @@ if uploaded_pdf and api_key:
                 chunkList.append(chunk)
             prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Notes:\n{chunkList}"
             result = call_together_ai(api_key, prompt)
-            st.header("🧠 Flashcards & Questions Preview")
+            st.header("🧠 Grouping and Mind Map Preview")
             st.subheader(f"Groupings")
             st.markdown(result)
 
