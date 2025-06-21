@@ -68,7 +68,7 @@ if uploaded_pdf and api_key:
             if st.button("✨ Generate Practice Quiz Questions"):
                 with st.spinner("Calling Together.ai and generating content..."):
                     flashcards=[]
-                    for i, chunk in enumerate(chunks):
+                    for i, chunk in enumerate(st.session_state.chunks):
                         prompt = f"From the following notes, devise 10 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by dollar signs. Vary the questions to cover different levels of bloom's taxonomy and indicate when you are doing so. Also describe each chunk as you list them. Notes:\n{chunk}"
                         try:
                             result = call_together_ai(api_key, prompt)
@@ -91,7 +91,7 @@ if uploaded_pdf and api_key:
             if st.button ("Generate Groupings/Mind Map Ideas"):
                 with st.spinner("Calling Together.ai and generating content..."):
                     chunkList=[]
-                    for i, chunk in enumerate(chunks):
+                    for i, chunk in enumerate(st.session_state.chunks):
                         chunkList.append(chunk)
                     prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
                     result = call_together_ai(api_key, prompt)
@@ -101,7 +101,7 @@ if uploaded_pdf and api_key:
             if st.button ("Generate Flashcards"):
                 flashcards=[]
                 with st.spinner("Calling Together.ai and making your flashcards..."):
-                    for i, chunk in enumerate(chunks):
+                    for i, chunk in enumerate(st.session_state.chunks):
                         prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
                         result=call_together_ai(api_key,prompt)
                         st.header("Flashcards")
