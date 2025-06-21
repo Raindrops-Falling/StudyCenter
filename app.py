@@ -6,13 +6,8 @@ import csv
 import io
 import os
 st.markdown("""<meta name="robots" content="noindex">""", unsafe_allow_html=True)
-
-if "query_count" not in st.session_state:
-    st.session_state.query_count = 0
-
-if st.session_state.query_count >= 10:
-    st.warning("You've hit your daily query limit.")
-    st.stop()
+if "mode" not in st.session_state:
+    st.session_state.mode = None
 
 api_key=os.getenv("api_key")
 
@@ -56,16 +51,26 @@ st.title("📘 PDF to Flashcards & Practice Quiz")
 uploaded_pdf = st.file_uploader("📄 Upload a PDF of notes:", type="pdf")
 
 if uploaded_pdf and api_key:
-    # Optional: reset chunks if uploading a new file
-    st.session_state.pop("chunks", None)
-
+    # Extract and store chunks if not done already
     if "chunks" not in st.session_state:
-       
-            text = extract_text_from_pdf(uploaded_pdf)
-            st.session_state.chunks = chunk_text(text)  # <- THIS IS WHERE YOU ADD IT
+        text = extract_text_from_pdf(uploaded_pdf)
+        st.session_state.chunks = chunk_text(text)
 
+    # Show the 3 main buttons only if no mode is active yet
+    if st.session_state.mode is None:
+        if st.button("✨ Generate Practice Quiz Questions"):
+            st.session_state.mode = "practice_quiz"
+            
 
-    if st.button("✨ Generate Practice Quiz Questions"):
+        if st.button("Generate Flashcards"):
+            st.session_state.mode = "flashcards"
+
+        if st.button("Generate Groupings/Mind Map Ideas"):
+            st.session_state.mode = "mind_map"
+
+    # Practice Quiz Mode UI and Logic
+    if st.session_state.mode == "practice_quiz":
+        st.write("**Practice Quiz Mode Active**")
         with st.spinner("Calling Together.ai and generating content..."):
             flashcards=[]
             for i, chunk in enumerate(st.session_state.chunks):
@@ -94,9 +99,26 @@ if uploaded_pdf and api_key:
         # Save to session state if needed
         st.session_state.last_quiz_result = flashcards
 
-        # Allow CSV export
-    
-    if st.button ("Generate Groupings/Mind Map Ideas"):
+        if st.button("⬅️ Back"):
+            st.session_state.mode = None
+
+    # Flashcards Mode UI and Logic
+    if st.session_state.mode == "flashcards":
+        st.write("**Flashcards Mode Active**")
+        with st.spinner("Calling Together.ai and making your flashcards..."):
+            flashcards=[]
+            for i, chunk in enumerate(st.session_state.chunks):
+                prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
+                result=call_together_ai(api_key,prompt)
+                st.header("Flashcards")
+                st.markdown(result)
+
+        if st.button("⬅️ Back"):
+            st.session_state.mode = None
+
+    # Mind Map Mode UI and Logic
+    if st.session_state.mode == "mind_map":
+        st.write("**Mind Map Mode Active**")
         with st.spinner("Calling Together.ai and generating content..."):
             chunkList=[]
             for i, chunk in enumerate(st.session_state.chunks):
@@ -106,13 +128,8 @@ if uploaded_pdf and api_key:
             st.header("🧠 Grouping and Mind Map Preview")
             st.subheader(f"Groupings")
             st.markdown(result)
-    if st.button ("Generate Flashcards"):
-        with st.spinner("Calling Together.ai and making your flashcards..."):
-            flashcards=[]
-            for i, chunk in enumerate(st.session_state.chunks):
-                prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
-                result=call_together_ai(api_key,prompt)
-                st.header("Flashcards")
-                st.markdown(result)
+
+        if st.button("⬅️ Back"):
+            st.session_state.mode = None
 else:
     st.warning("Please upload a PDF and enter your API key.")
