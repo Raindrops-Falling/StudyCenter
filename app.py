@@ -56,7 +56,7 @@ if uploaded_pdf and api_key:
     if st.button("✨ Generate Practice Quiz Questions"):
         with st.spinner("Calling Together.ai and generating content..."):
             for i, chunk in enumerate(chunks):
-                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by dollar signs. Notes:\n{chunk}"
+                prompt = f"From the following notes, devise 10 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present), while enclosing mathematical equations in LaTeX format enclosed by dollar signs. Vary the questions to cover different levels of bloom's taxonomy and indicate when you are doing so. Also describe each chunk as you list them. Notes:\n{chunk}"
                 try:
                     result = call_together_ai(api_key, prompt)
                     flashcards.append((chunk, result))
@@ -64,8 +64,7 @@ if uploaded_pdf and api_key:
                 except Exception as e:
                     error_str=str(e).lower()
                     if "rate limit" in error_str or "quota" in error_str or "429" in error_str:
-                        print("detected")
-                        
+                        st.markdown("done")
         st.success("Done generating content!")
 
         # Optionally display results
@@ -75,19 +74,13 @@ if uploaded_pdf and api_key:
             st.markdown(content)
 
         # Allow CSV export
-        if st.button("📥 Download as CSV"):
-            output = io.StringIO()
-            writer = csv.writer(output)
-            writer.writerow(["Chunk", "Generated Content"])
-            for chunk, content in flashcards:
-                writer.writerow([chunk, content])
-            st.download_button("Download CSV", data=output.getvalue(), file_name="flashcards.csv", mime="text/csv")
+    
     if st.button ("Generate Groupings/Mind Map Ideas"):
         with st.spinner("Calling Together.ai and generating content..."):
             chunkList=[]
             for i, chunk in enumerate(chunks):
                 chunkList.append(chunk)
-            prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Notes:\n{chunkList}"
+            prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
             result = call_together_ai(api_key, prompt)
             st.header("🧠 Grouping and Mind Map Preview")
             st.subheader(f"Groupings")
