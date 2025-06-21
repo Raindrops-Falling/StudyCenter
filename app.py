@@ -5,6 +5,14 @@ import time
 import csv
 import io
 import os
+st.markdown("""<meta name="robots" content="noindex">""", unsafe_allow_html=True)
+
+if "query_count" not in st.session_state:
+    st.session_state.query_count = 0
+
+if st.session_state.query_count >= 10:
+    st.warning("You've hit your daily query limit.")
+    st.stop()
 
 api_key=os.getenv("api_key")
 
@@ -89,7 +97,7 @@ if uploaded_pdf and api_key:
             for i, chunk in enumerate(chunks):
                 prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
                 result=call_together_ai(api_key,prompt)
-                st.header(Flashcards)
+                st.header("Flashcards")
                 st.markdown(result)
 else:
     st.warning("Please upload a PDF and enter your API key.")
