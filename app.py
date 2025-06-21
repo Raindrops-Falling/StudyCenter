@@ -115,7 +115,6 @@ if uploaded_pdf and api_key:
                 st.markdown(result)
 
         if st.button("⬅️ Back"):
-           st.session_state.pop("flashcards", None)
            st.session_state.mode = "home"
 
     # Mind Map Mode UI and Logic
@@ -133,5 +132,6 @@ if uploaded_pdf and api_key:
 
         if st.button("⬅️ Back"):
             st.session_state.mode = "home"
+    st.write("🧠 Session State Variables:", st.session_state)
 else:
     st.warning("Please upload a PDF and enter your API key.")
