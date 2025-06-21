@@ -65,7 +65,7 @@ if uploaded_pdf and api_key:
     if st.button("✨ Generate Flashcards and Questions"):
         with st.spinner("Calling Together.ai and generating content..."):
             for i, chunk in enumerate(chunks):
-                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. Include all chunks. Notes:\n{chunk}"
+                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. If mathematical concepts are present, please interpret and make the questions math-related (or similar to the questions present). Notes:\n{chunk}"
                 result = call_together_ai(api_key, prompt)
                 flashcards.append((chunk, result))
                 time.sleep(1.5)  # throttle to avoid hitting rate limit
