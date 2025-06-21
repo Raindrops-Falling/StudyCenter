@@ -4,6 +4,9 @@ import fitz  # PyMuPDF
 import time
 import csv
 import io
+import os
+
+api_key=os.getenv("api_key")
 
 # ----------------- PDF TEXT EXTRACTION -------------------
 def extract_text_from_pdf(uploaded_file):
@@ -37,7 +40,7 @@ def chunk_text(text, chunk_size=250):
 st.set_page_config(page_title="PDF → Flashcards & Quiz", layout="wide")
 st.title("📘 PDF to Flashcards & Practice Quiz")
 
-api_key = st.text_input("🔑 Enter your Together.ai API key:", type="password")
+
 
 uploaded_pdf = st.file_uploader("📄 Upload a PDF of notes:", type="pdf")
 
