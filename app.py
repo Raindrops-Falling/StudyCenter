@@ -7,7 +7,7 @@ import io
 import os
 st.markdown("""<meta name="robots" content="noindex">""", unsafe_allow_html=True)
 if "mode" not in st.session_state:
-    st.session_state.mode = None
+    st.session_state.mode = "home"
 
 api_key=os.getenv("api_key")
 
@@ -57,7 +57,7 @@ if uploaded_pdf and api_key:
         st.session_state.chunks = chunk_text(text)
 
     # Show the 3 main buttons only if no mode is active yet
-    if st.session_state.mode is None:
+    if st.session_state.mode == "home":
         if st.button("✨ Generate Practice Quiz Questions"):
             st.session_state.mode = "practice_quiz"
             
@@ -100,8 +100,8 @@ if uploaded_pdf and api_key:
         st.session_state.last_quiz_result = flashcards
 
         if st.button("⬅️ Back"):
-            st.session_state.pop("practice_quiz", None)
-            st.session_state.mode = None
+            
+            st.session_state.mode = "home"
 
     # Flashcards Mode UI and Logic
     if st.session_state.mode == "flashcards":
@@ -115,8 +115,7 @@ if uploaded_pdf and api_key:
                 st.markdown(result)
 
         if st.button("⬅️ Back"):
-            st.session_state.pop(flashcards,None)
-            st.session_state.mode = None
+           st.session_state.mode = "home"
 
     # Mind Map Mode UI and Logic
     if st.session_state.mode == "mind_map":
@@ -132,7 +131,6 @@ if uploaded_pdf and api_key:
             st.markdown(result)
 
         if st.button("⬅️ Back"):
-            st.session_state.pop(mind_map,None)
-            st.session_state.mode = None
+            st.session_state.mode = "home"
 else:
     st.warning("Please upload a PDF and enter your API key.")
