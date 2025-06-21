@@ -126,11 +126,13 @@ if uploaded_pdf and api_key:
                 chunkList.append(chunk)
             prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
             result = call_together_ai(api_key, prompt)
+            st.session.state.flashcards=result
             st.header("🧠 Grouping and Mind Map Preview")
             st.subheader(f"Groupings")
             st.markdown(result)
 
         if st.button("⬅️ Back"):
+            st.session.state.pop("flashcards", None)
             st.session_state.mode = "home"
     st.write("🧠 Session State Variables:", st.session_state)
 else:
