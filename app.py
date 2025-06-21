@@ -29,7 +29,7 @@ def call_together_ai(api_key, prompt):
     return response.choices[0].message.content
 
 # ----------------- CHUNKING -------------------
-def chunk_text(text, chunk_size=500):
+def chunk_text(text, chunk_size=250):
     words = text.split()
     return [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
 
@@ -52,7 +52,7 @@ if uploaded_pdf and api_key:
     if st.button("✨ Generate Flashcards and Questions"):
         with st.spinner("Calling Together.ai and generating content..."):
             for i, chunk in enumerate(chunks):
-                prompt = f"From the following notes, generate 2 flashcards (Q&A) and 1 multiple-choice question with 4 answer choices and the correct one marked. Notes:\n{chunk}"
+                prompt = f"From the following notes, devise 25 multiple choice questions with the answer choices in bullet points. Do not show answers. Include all chunks. Notes:\n{chunk}"
                 result = call_together_ai(api_key, prompt)
                 flashcards.append((chunk, result))
                 time.sleep(1.5)  # throttle to avoid hitting rate limit
@@ -73,5 +73,16 @@ if uploaded_pdf and api_key:
             for chunk, content in flashcards:
                 writer.writerow([chunk, content])
             st.download_button("Download CSV", data=output.getvalue(), file_name="flashcards.csv", mime="text/csv")
+    if st.button ("Generate Groupings/Mind Map Ideas"):
+        with st.spinner("Calling Together.ai and generating content..."):
+            chunkList=[]
+            for i, chunk in enumerate(chunks):
+                chunkList.append(chunk)
+            prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Notes:\n{chunkList}"
+            result = call_together_ai(api_key, prompt)
+            st.header("🧠 Flashcards & Questions Preview")
+            st.subheader(f"Groupings")
+            st.markdown(result)
+
 else:
     st.warning("Please upload a PDF and enter your API key.")
