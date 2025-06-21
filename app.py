@@ -60,7 +60,7 @@ if uploaded_pdf and api_key:
     st.session_state.pop("chunks", None)
 
     if "chunks" not in st.session_state:
-        with st.spinner("Extracting and chunking text..."):
+       
             text = extract_text_from_pdf(uploaded_pdf)
             st.session_state.chunks = chunk_text(text)  # <- THIS IS WHERE YOU ADD IT
 
@@ -82,7 +82,7 @@ if uploaded_pdf and api_key:
 
                 # Optionally display results
                 st.header("🧠 Flashcards & Questions Preview")
-                for i, (chunk, content) in enumerate(flashcards):
+                for i, content in enumerate(flashcards):
                     st.subheader(f"Chunk {i+1}")
                     st.markdown(content)
 
