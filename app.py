@@ -18,18 +18,28 @@ def extract_text_from_pdf(uploaded_file):
 
 # ----------------- TOGETHER.AI REQUEST (SDK Version) -------------------
 def call_together_ai(api_key, prompt):
-    client = Together(api_key=api_key)
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
-        messages=[
-            {"role": "system", "content": "You are an expert tutor creating flashcards and practice test questions."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1024,
-        temperature=0.7,
-        stream=False  # Set to True for real-time streaming in future
-    )
-    return response.choices[0].message.content
+    try:
+        client = Together(api_key=api_key)
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            messages=[
+                {"role": "system", "content": "You are an expert tutor creating flashcards and practice test questions."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1024,
+            temperature=0.7,
+            stream=False  # Set to True for real-time streaming in future
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        if "Rate limit" in str(e) or "quota" in str(e).lower():
+            print("⚠️ Rate limit or token quota exceeded.")
+            # Handle it: wait, rotate keys, or retry later
+            time.sleep(5)  # simple backoff
+            raise  # Optional: re-raise if you want to handle it at a higher level
+        else:
+            print(f"❌ Other error: {e}")
+            raise
 
 # ----------------- CHUNKING -------------------
 def chunk_text(text, chunk_size=250):
