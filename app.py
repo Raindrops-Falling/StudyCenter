@@ -121,6 +121,7 @@ if uploaded_pdf and api_key:
         if st.button("⬅️ Back"):
            st.session_state.pop("flashcards", None) 
            st.session_state.mode = "home"
+           st.experimental_rerun()
 
     # Mind Map Mode UI and Logic
     if "mind_map" not in st.session_state:
@@ -141,7 +142,7 @@ if uploaded_pdf and api_key:
         if st.button("⬅️ Back"):
             st.session_state.pop("mind_map", None)
             st.session_state.mode = "home"
-            st.write("Yes, you clicked this")
+            st.experimental_rerun()
 
 else:
     st.warning("Please upload a PDF and enter your API key.")
