@@ -107,14 +107,19 @@ if uploaded_pdf and api_key:
     if st.session_state.mode == "flashcards":
         st.write("**Flashcards Mode Active**")
         with st.spinner("Calling Together.ai and making your flashcards..."):
+            mergeList=[]
             flashcards=[]
             for i, chunk in enumerate(st.session_state.chunks):
                 prompt=f"From the following notes, give me 10 questions (just the question, do not give multiple choice answers)based on the chunk at hand. Notes:\n{chunk}"
                 result=call_together_ai(api_key,prompt)
+                mergeList.append(result)
+                
                 st.header("Flashcards")
                 st.markdown(result)
+            st.session_state.flashcards=mergeList
 
         if st.button("⬅️ Back"):
+           st.session_state.pop("flashcards", None) 
            st.session_state.mode = "home"
 
     # Mind Map Mode UI and Logic
@@ -126,13 +131,13 @@ if uploaded_pdf and api_key:
                 chunkList.append(chunk)
             prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
             result = call_together_ai(api_key, prompt)
-            st.session.state.flashcards=result
+            st.session_state.mind_map=result
             st.header("🧠 Grouping and Mind Map Preview")
             st.subheader(f"Groupings")
             st.markdown(result)
 
         if st.button("⬅️ Back"):
-            st.session.state.pop("flashcards", None)
+            st.session_state.pop("mind_map", None)
             st.session_state.mode = "home"
     st.write("🧠 Session State Variables:", st.session_state)
 else:
