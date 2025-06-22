@@ -135,15 +135,16 @@ if uploaded_pdf and api_key:
                 prompt=f"From the following notes, place everything into key groups and explain their connection in depth. Aim for 6-7 terms per group and pay attention to headers in the text to make judgements. Describe all terms and the pages of the groups they are on. Notes:\n{chunkList}"
                 result = call_together_ai(api_key, prompt)
                 st.session_state.mind_map=result
+        if "mind_map" in st.session_state:
       
-        st.header("🧠 Grouping and Mind Map Preview")
-        st.subheader(f"Groupings")
-        st.markdown(st.session_state.mind_map)
+            st.header("🧠 Grouping and Mind Map Preview")
+            st.subheader(f"Groupings")
+            st.markdown(st.session_state.mind_map)
 
-        if st.button("⬅️ Back"):
-            st.session_state.pop("mind_map", None)
-            st.session_state.mode = "home"
-            st.rerun()
+            if st.button("⬅️ Back"):
+                st.session_state.pop("mind_map", None)
+                st.session_state.mode = "home"
+                st.rerun()
 
 else:
     st.warning("Please upload a PDF and enter your API key.")
