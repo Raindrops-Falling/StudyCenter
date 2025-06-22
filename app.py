@@ -138,10 +138,10 @@ if uploaded_pdf and api_key:
         st.subheader(f"Groupings")
         st.markdown(st.session_state.mind_map)
 
-            if st.button("⬅️ Back"):
-                st.session_state.pop("mind_map", None)
-                st.session_state.mode = "home"
-                st.write("Yes, you clicked this")
+        if st.button("⬅️ Back"):
+            st.session_state.pop("mind_map", None)
+            st.session_state.mode = "home"
+            st.write("Yes, you clicked this")
 
 else:
     st.warning("Please upload a PDF and enter your API key.")
