@@ -144,6 +144,7 @@ if uploaded_pdf and api_key:
                 st.session_state.pop("mind_map", None)
                 st.session_state.mode = "home"
                 st.rerun()
+                st.stop()
 
 else:
     st.warning("Please upload a PDF and enter your API key.")
