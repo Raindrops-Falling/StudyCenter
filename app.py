@@ -143,7 +143,6 @@ if uploaded_pdf and api_key:
         if st.button("⬅️ Back"):
             st.session_state.pop("mind_map", None)
             st.session_state.mode = "home"
-            st.rerun()
             st.stop()
 
 else:
